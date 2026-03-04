@@ -36,14 +36,25 @@ export default function Index() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const json: any[] = XLSX.utils.sheet_to_json(ws);
 
-      const parsed: CampaignData[] = json.map((row) => ({
-        campanha: String(row["Campanha"] || row["campanha"] || ""),
-        investimento: Number(row["Investimento"] || row["investimento"] || 0),
-        receita: Number(row["Receita"] || row["receita"] || 0),
-        roas: Number(row["ROAS"] || row["roas"] || 0),
-        cliques: Number(row["Cliques"] || row["cliques"] || 0),
-        conversoes: Number(row["Conversões"] || row["conversoes"] || row["Conversoes"] || 0),
-      }));
+      const parsed: CampaignData[] = json.map((row) => {
+        const receita = Number(row["Receita\n(Moeda local)"] || row["Receita (Moeda local)"] || row["Receita"] || row["receita"] || 0);
+        const investimento = Number(row["Investimento\n(Moeda local)"] || row["Investimento (Moeda local)"] || row["Investimento"] || row["investimento"] || 0);
+        const roas = Number(row["ROAS\n(Receitas / Investimento)"] || row["ROAS (Receitas / Investimento)"] || row["ROAS"] || row["roas"] || (investimento > 0 ? receita / investimento : 0));
+        const cliques = Number(row["Cliques"] || row["cliques"] || 0);
+        const vendasDiretas = Number(row["Vendas diretas"] || 0);
+        const vendasIndiretas = Number(row["Vendas indiretas"] || 0);
+        const vendasPublicidade = Number(row["Vendas por publicidade\n(Diretas + Indiretas)"] || row["Vendas por publicidade (Diretas + Indiretas)"] || 0);
+        const conversoes = vendasPublicidade || (vendasDiretas + vendasIndiretas) || Number(row["Conversões"] || row["conversoes"] || row["Conversoes"] || 0);
+
+        return {
+          campanha: String(row["Campanha"] || row["campanha"] || ""),
+          investimento,
+          receita,
+          roas,
+          cliques,
+          conversoes,
+        };
+      });
 
       if (parsed.length > 0 && parsed[0].campanha) {
         setData(parsed);
