@@ -36,10 +36,9 @@ export default function Index() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const json: any[] = XLSX.utils.sheet_to_json(ws);
 
-      const parsed: CampaignData[] = json.map((row) => {
+      const rows = json.map((row: any) => {
         const receita = Number(row["Receita\n(Moeda local)"] || row["Receita (Moeda local)"] || row["Receita"] || row["receita"] || 0);
         const investimento = Number(row["Investimento\n(Moeda local)"] || row["Investimento (Moeda local)"] || row["Investimento"] || row["investimento"] || 0);
-        const roas = Number(row["ROAS\n(Receitas / Investimento)"] || row["ROAS (Receitas / Investimento)"] || row["ROAS"] || row["roas"] || (investimento > 0 ? receita / investimento : 0));
         const cliques = Number(row["Cliques"] || row["cliques"] || 0);
         const vendasDiretas = Number(row["Vendas diretas"] || 0);
         const vendasIndiretas = Number(row["Vendas indiretas"] || 0);
@@ -47,14 +46,32 @@ export default function Index() {
         const conversoes = vendasPublicidade || (vendasDiretas + vendasIndiretas) || Number(row["Conversões"] || row["conversoes"] || row["Conversoes"] || 0);
 
         return {
-          campanha: String(row["Campanha"] || row["campanha"] || ""),
+          campanha: String(row["Campanha"] || row["campanha"] || "").trim(),
           investimento,
           receita,
-          roas,
+          roas: 0,
           cliques,
           conversoes,
         };
       });
+
+      // Agrupar por campanha
+      const grouped = new Map<string, CampaignData>();
+      for (const r of rows) {
+        const existing = grouped.get(r.campanha);
+        if (existing) {
+          existing.investimento += r.investimento;
+          existing.receita += r.receita;
+          existing.cliques += r.cliques;
+          existing.conversoes += r.conversoes;
+        } else {
+          grouped.set(r.campanha, { ...r });
+        }
+      }
+      const parsed = Array.from(grouped.values()).map((c) => ({
+        ...c,
+        roas: c.investimento > 0 ? c.receita / c.investimento : 0,
+      }));
 
       if (parsed.length > 0 && parsed[0].campanha) {
         setData(parsed);
