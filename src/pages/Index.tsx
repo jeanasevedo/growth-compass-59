@@ -8,6 +8,7 @@ import { DoughnutChart } from "@/components/DoughnutChart";
 import { TabelaEstrategica } from "@/components/TabelaEstrategica";
 import { ResumoEstrategico } from "@/components/ResumoEstrategico";
 import { EmptyState } from "@/components/EmptyState";
+import { BudgetOpportunity } from "@/components/BudgetOpportunity";
 import { CampaignData, demoData, computeMetrics } from "@/lib/demoData";
 import * as XLSX from "xlsx";
 
@@ -146,6 +147,13 @@ export default function Index() {
                   />
                 </div>
               </div>
+
+              <BudgetOpportunity
+                roasMedio={metrics.roasMedio}
+                totalConversoesAtual={metrics.totalConversoesAtual}
+                totalReceitaAtual={metrics.totalReceitaAtual}
+                totalInvestimentoAtual={metrics.totalInvestimentoAtual}
+              />
 
               <TabelaEstrategica
                 campaigns={metrics.campaigns}
