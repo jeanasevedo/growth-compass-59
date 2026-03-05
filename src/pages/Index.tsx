@@ -249,15 +249,15 @@ export default function Index() {
                 roasMedio={metrics.roasMedio}
               />
 
-              {/* Second export button above strategic table */}
+              {/* Import button above strategic table */}
               <div className="flex justify-end">
                 <Button
-                  onClick={handleExportPdf}
+                  onClick={handleUpload}
                   variant="outline"
                   className="gap-2"
                 >
-                  <FileDown className="h-4 w-4" />
-                  Exportar Relatório PDF
+                  <FileDown className="h-4 w-4 rotate-180" />
+                  Importar Planilha
                 </Button>
               </div>
 
