@@ -7,6 +7,7 @@ interface CampaignOpp {
   campanha: string;
   prints: number;
   percentWon: number;
+  lisb: number;
   cliques: number;
   conversoes: number;
   receita: number;
@@ -121,7 +122,7 @@ export function BudgetOpportunity({
           <thead>
             <tr className="border-b border-border">
               <th className="text-left font-medium text-muted-foreground px-4 py-3">Campanha</th>
-              <th className="text-right font-medium text-muted-foreground px-3 py-3">% Won</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">LISB %</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Impr. Perdidas</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Atual</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Sugerido</th>
@@ -143,7 +144,7 @@ export function BudgetOpportunity({
               return (
                 <tr key={c.campanha} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
                   <td className="px-4 py-3 font-medium text-foreground">{c.campanha}</td>
-                  <td className="px-3 py-3 text-right tabular-nums">{c.percentWon.toFixed(0)}%</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-amber-600">{c.lisb.toFixed(1)}%</td>
                   <td className="px-3 py-3 text-right tabular-nums text-amber-600">
                     {Math.round(c.impressoesPerdidas).toLocaleString("pt-BR")}
                   </td>

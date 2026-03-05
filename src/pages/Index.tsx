@@ -81,6 +81,9 @@ export default function Index() {
         const percentWon = parseNumber(
           findCol(row, "% Won", "% Impressões ganhas")
         );
+        const lisb = parseNumber(
+          findCol(row, "LISB", "Lost Impression Share Budget", "Impressões perdidas por orçamento")
+        );
         const orcamentoAtual = parseNumber(
           findCol(row, "Último Budget", "Budget promedio diario", "Orçamento atual")
         );
@@ -124,6 +127,7 @@ export default function Index() {
           conversoes,
           prints,
           percentWon,
+          lisb,
           orcamentoAtual,
           orcamentoSugerido,
           diasTopada,
@@ -155,6 +159,7 @@ export default function Index() {
           // For simplicity, take the average after grouping
           existing.pctDiasTopados = Math.max(existing.pctDiasTopados, r.pctDiasTopados);
           existing.percentWon = Math.max(existing.percentWon, r.percentWon);
+          existing.lisb = Math.max(existing.lisb, r.lisb);
         } else {
           grouped.set(r.campanha, { ...r });
         }
