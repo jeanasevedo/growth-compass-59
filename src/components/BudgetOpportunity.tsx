@@ -1,34 +1,55 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Input } from "@/components/ui/input";
-import { TrendingUp, DollarSign, Eye, Target } from "lucide-react";
+import { motion } from "framer-motion";
+import { Target, TrendingUp, ShoppingCart, DollarSign, Eye, AlertTriangle } from "lucide-react";
 import { CountUp } from "./CountUp";
+import { Badge } from "@/components/ui/badge";
 
-interface Props {
-  roasMedio: number;
-  totalConversoesAtual: number;
-  totalReceitaAtual: number;
-  totalInvestimentoAtual: number;
+interface CampaignOpp {
+  campanha: string;
+  prints: number;
+  percentWon: number;
+  cliques: number;
+  conversoes: number;
+  receita: number;
+  orcamentoAtual: number;
+  orcamentoSugerido: number;
+  pctDiasTopados: number;
+  impressoesPerdidas: number;
+  ctr: number;
+  cliquesRecuperaveis: number;
+  vendasRecuperaveis: number;
+  receitaRecuperavel: number;
+  orcamentoAdicional: number;
+  ticketMedio: number;
+  roas: number;
 }
 
-export function BudgetOpportunity({ roasMedio, totalConversoesAtual, totalReceitaAtual, totalInvestimentoAtual }: Props) {
-  const [impressoesPerdidas, setImpressoesPerdidas] = useState<number>(0);
-  const [orcamentoAtual, setOrcamentoAtual] = useState<number>(0);
-  const [orcamentoRecomendado, setOrcamentoRecomendado] = useState<number>(0);
+interface Props {
+  campaigns: CampaignOpp[];
+  totalVendasRecuperaveis: number;
+  totalReceitaRecuperavel: number;
+  totalOrcamentoAdicional: number;
+  totalImpressoesPerdidas: number;
+  roasMedio: number;
+}
 
-  const orcamentoAdicional = Math.max(0, orcamentoRecomendado - orcamentoAtual);
-  const percentualAumento = orcamentoAtual > 0 ? (orcamentoAdicional / orcamentoAtual) * 100 : 0;
-
-  // Estimate additional sales based on budget proportion and current performance
-  const cvrGlobal = totalInvestimentoAtual > 0 ? totalConversoesAtual / totalInvestimentoAtual : 0;
-  const vendasAdicionaisEstimadas = Math.round(orcamentoAdicional * cvrGlobal);
-  const receitaAdicionalEstimada = orcamentoAdicional * roasMedio;
-  const roasProjetado = orcamentoRecomendado > 0 ? (totalReceitaAtual + receitaAdicionalEstimada) / (totalInvestimentoAtual + orcamentoAdicional) : roasMedio;
-
-  const hasInput = impressoesPerdidas > 0 || orcamentoAtual > 0 || orcamentoRecomendado > 0;
-
+export function BudgetOpportunity({
+  campaigns,
+  totalVendasRecuperaveis,
+  totalReceitaRecuperavel,
+  totalOrcamentoAdicional,
+  totalImpressoesPerdidas,
+  roasMedio,
+}: Props) {
   const fmt = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  const campaignsWithOpp = campaigns
+    .filter((c) => c.impressoesPerdidas > 0 && c.orcamentoAdicional > 0)
+    .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel);
+
+  if (campaignsWithOpp.length === 0) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -43,110 +64,104 @@ export function BudgetOpportunity({ roasMedio, totalConversoesAtual, totalReceit
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Oportunidade por Impressões Perdidas</h3>
-          <p className="text-sm text-muted-foreground">Insira os dados da plataforma para estimar o potencial de crescimento</p>
+          <p className="text-sm text-muted-foreground">
+            Potencial de crescimento baseado em impressões perdidas por orçamento e taxa de conversão por campanha
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground flex items-center gap-2">
-            <Eye className="h-4 w-4 text-muted-foreground" />
-            Impressões perdidas por orçamento
-          </label>
-          <Input
-            type="number"
-            placeholder="Ex: 50000"
-            value={impressoesPerdidas || ""}
-            onChange={(e) => setImpressoesPerdidas(Number(e.target.value) || 0)}
-            className="bg-background/50"
-          />
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Impressões perdidas</p>
+          <p className="text-xl font-bold text-amber-600">
+            <CountUp value={totalImpressoesPerdidas} />
+          </p>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            Orçamento atual (R$)
-          </label>
-          <Input
-            type="number"
-            placeholder="Ex: 10000"
-            value={orcamentoAtual || ""}
-            onChange={(e) => setOrcamentoAtual(Number(e.target.value) || 0)}
-            className="bg-background/50"
-          />
+        <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendas recuperáveis</p>
+          <p className="text-xl font-bold text-emerald-600">
+            <CountUp value={totalVendasRecuperaveis} prefix="+" />
+          </p>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            Orçamento recomendado (R$)
-          </label>
-          <Input
-            type="number"
-            placeholder="Ex: 15000"
-            value={orcamentoRecomendado || ""}
-            onChange={(e) => setOrcamentoRecomendado(Number(e.target.value) || 0)}
-            className="bg-background/50"
-          />
+        <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Receita recuperável</p>
+          <p className="text-xl font-bold text-emerald-600">
+            <CountUp value={totalReceitaRecuperavel} prefix="R$ " />
+          </p>
+        </div>
+        <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Investimento necessário</p>
+          <p className="text-xl font-bold text-primary">
+            <CountUp value={totalOrcamentoAdicional * 30} prefix="R$ " />
+          </p>
+          <p className="text-xs text-muted-foreground">/mês (diário × 30)</p>
         </div>
       </div>
 
-      <AnimatePresence>
-        {hasInput && orcamentoAdicional > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-5"
-          >
-            <div className="h-px bg-border/50" />
+      {/* Insight */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4"
+      >
+        <p className="text-sm text-foreground">
+          <span className="font-semibold text-amber-600">💡 Insight:</span>{" "}
+          Existem <span className="font-semibold">{totalImpressoesPerdidas.toLocaleString("pt-BR")}</span> impressões perdidas por orçamento
+          em {campaignsWithOpp.length} campanhas. Ajustando o budget diário de cada campanha para o valor sugerido,
+          é possível recuperar até{" "}
+          <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
+          e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.
+        </p>
+      </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Investimento adicional</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  <CountUp value={orcamentoAdicional} prefix="R$ " />
-                </p>
-                <p className="text-xs text-emerald-600/70">+{percentualAumento.toFixed(0)}% do atual</p>
-              </div>
-              <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendas adicionais estimadas</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  <CountUp value={vendasAdicionaisEstimadas} prefix="+" />
-                </p>
-              </div>
-              <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Receita adicional estimada</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  <CountUp value={receitaAdicionalEstimada} prefix="R$ " />
-                </p>
-              </div>
-              <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">ROAS projetado</p>
-                <p className="text-xl font-bold text-primary">
-                  <CountUp value={roasProjetado} decimals={2} suffix="x" />
-                </p>
-              </div>
-            </div>
+      {/* Per-campaign table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="text-left font-medium text-muted-foreground px-4 py-3">Campanha</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">% Won</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Impr. Perdidas</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Atual</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Sugerido</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Vendas Recup.</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Receita Recup.</th>
+              <th className="text-center font-medium text-muted-foreground px-3 py-3">Prioridade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {campaignsWithOpp.map((c) => {
+              const priority = c.pctDiasTopados >= 60 ? "Alta" : c.pctDiasTopados >= 30 ? "Média" : "Baixa";
+              const priorityClass =
+                priority === "Alta"
+                  ? "bg-destructive/10 text-destructive"
+                  : priority === "Média"
+                  ? "bg-amber-500/10 text-amber-600"
+                  : "bg-muted text-muted-foreground";
 
-            {impressoesPerdidas > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4"
-              >
-                <p className="text-sm text-foreground">
-                  <span className="font-semibold text-amber-600">💡 Insight:</span>{" "}
-                  Com <span className="font-semibold">{impressoesPerdidas.toLocaleString("pt-BR")}</span> impressões perdidas por orçamento,
-                  ao ajustar o investimento de <span className="font-semibold">{fmt(orcamentoAtual)}</span> para{" "}
-                  <span className="font-semibold">{fmt(orcamentoRecomendado)}</span>,
-                  você pode capturar essas oportunidades e gerar aproximadamente{" "}
-                  <span className="font-bold text-emerald-600">{fmt(receitaAdicionalEstimada)}</span> em receita adicional
-                  com <span className="font-bold text-emerald-600">+{vendasAdicionaisEstimadas}</span> vendas estimadas.
-                </p>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              return (
+                <tr key={c.campanha} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground">{c.campanha}</td>
+                  <td className="px-3 py-3 text-right tabular-nums">{c.percentWon.toFixed(0)}%</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-amber-600">
+                    {Math.round(c.impressoesPerdidas).toLocaleString("pt-BR")}
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums">{fmt(c.orcamentoAtual)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums font-medium">{fmt(c.orcamentoSugerido)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">+{c.vendasRecuperaveis}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">{fmt(c.receitaRecuperavel)}</td>
+                  <td className="px-3 py-3 text-center">
+                    <Badge variant="secondary" className={`border-0 ${priorityClass}`}>
+                      {priority}
+                    </Badge>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </motion.div>
   );
 }
