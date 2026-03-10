@@ -1,47 +1,273 @@
-export interface CampaignData {
+// ============================
+// Interface: Dados Gerais (modelo_ads_manager_dados_gerais)
+// ============================
+export interface GeneralData {
+  desde: string;
+  ate: string;
   campanha: string;
-  investimento: number;
-  receita: number;
-  roas: number;
+  tituloAnuncio: string;
+  codigoAnuncio: string;
+  status: string;
+  impressoes: number;
   cliques: number;
-  conversoes: number;
+  cpc: number;
+  ctr: number;
+  cvr: number;
+  receita: number;
+  investimento: number;
+  acos: number;
+  roas: number;
+  vendasDiretas: number;
+  vendasIndiretas: number;
+  vendasPublicidade: number;
+  receitaVendasDiretas: number;
+  receitaVendasIndiretas: number;
+}
+
+// ============================
+// Interface: Análise de Campanhas (Modelo_analise_campanhas)
+// ============================
+export interface CampaignData {
+  idCampanha: string;
+  campanha: string;
   prints: number;
-  percentWon: number;
-  lisb: number; // Lost Impression Share by Budget (percentage 0-100)
-  lisr: number; // Lost Impression Share by Rank
+  ultimaModificacao: string;
+  receita: number;
+  investimento: number;
+  acosReal: number;
   orcamentoAtual: number;
+  budgetPromedioDiario: number;
   orcamentoSugerido: number;
   diasTopada: number;
   diasComPrints: number;
   pctDiasTopados: number;
-  roasObjetivo: number;
-  acosReal: number;
   acosTarget: number;
-  acosCompetencia?: number;
-  desvioAcos?: number;
-  statusCampanha?: string;
-  idCampanha?: string;
-  ultimaModificacao?: string;
-  budgetPromedioDiario?: number;
+  acosCompetencia: number;
+  desvioAcos: string;
+  cliques: number;
+  lisb: number;
+  lisr: number;
+  percentWon: number;
+  roas: number;
+  roasObjetivo: number;
+  // Computed (not in file)
+  conversoes: number;
 }
 
-export const demoData: CampaignData[] = [
-  { campanha: "Brand - Search", investimento: 12500, receita: 87500, roas: 7.0, cliques: 4200, conversoes: 125, prints: 50000, percentWon: 85, lisb: 15, lisr: 5, orcamentoAtual: 500, orcamentoSugerido: 650, diasTopada: 8, diasComPrints: 30, pctDiasTopados: 27, roasObjetivo: 6.0, acosReal: 14.3, acosTarget: 15 },
-  { campanha: "Performance Max", investimento: 28000, receita: 112000, roas: 4.0, cliques: 9800, conversoes: 280, prints: 120000, percentWon: 62, lisb: 38, lisr: 12, orcamentoAtual: 1000, orcamentoSugerido: 1500, diasTopada: 18, diasComPrints: 30, pctDiasTopados: 60, roasObjetivo: 4.5, acosReal: 25, acosTarget: 22 },
-  { campanha: "Shopping - Catálogo", investimento: 18000, receita: 90000, roas: 5.0, cliques: 7200, conversoes: 200, prints: 80000, percentWon: 70, lisb: 30, lisr: 8, orcamentoAtual: 600, orcamentoSugerido: 850, diasTopada: 12, diasComPrints: 30, pctDiasTopados: 40, roasObjetivo: 4.0, acosReal: 20, acosTarget: 25 },
-  { campanha: "Display - Remarketing", investimento: 8500, receita: 34000, roas: 4.0, cliques: 15000, conversoes: 85, prints: 200000, percentWon: 45, lisb: 55, lisr: 20, orcamentoAtual: 300, orcamentoSugerido: 550, diasTopada: 22, diasComPrints: 30, pctDiasTopados: 73, roasObjetivo: 5.0, acosReal: 25, acosTarget: 20 },
-  { campanha: "YouTube - Awareness", investimento: 15000, receita: 37500, roas: 2.5, cliques: 22000, conversoes: 75, prints: 300000, percentWon: 55, lisb: 45, lisr: 15, orcamentoAtual: 500, orcamentoSugerido: 700, diasTopada: 15, diasComPrints: 30, pctDiasTopados: 50, roasObjetivo: 3.0, acosReal: 40, acosTarget: 33 },
-  { campanha: "Search - Genérico", investimento: 22000, receita: 66000, roas: 3.0, cliques: 8800, conversoes: 165, prints: 90000, percentWon: 75, lisb: 25, lisr: 10, orcamentoAtual: 750, orcamentoSugerido: 950, diasTopada: 10, diasComPrints: 30, pctDiasTopados: 33, roasObjetivo: 3.5, acosReal: 33.3, acosTarget: 28 },
-  { campanha: "Discovery - Prospecting", investimento: 10000, receita: 35000, roas: 3.5, cliques: 12000, conversoes: 100, prints: 150000, percentWon: 50, lisb: 50, lisr: 18, orcamentoAtual: 350, orcamentoSugerido: 600, diasTopada: 20, diasComPrints: 30, pctDiasTopados: 67, roasObjetivo: 4.0, acosReal: 28.6, acosTarget: 25 },
-  { campanha: "Shopping - Smart", investimento: 16000, receita: 80000, roas: 5.0, cliques: 6400, conversoes: 190, prints: 70000, percentWon: 80, lisb: 20, lisr: 6, orcamentoAtual: 550, orcamentoSugerido: 700, diasTopada: 6, diasComPrints: 30, pctDiasTopados: 20, roasObjetivo: 4.5, acosReal: 20, acosTarget: 22 },
+// ============================
+// Header maps: exact header → field
+// ============================
+
+const GENERAL_HEADERS: Record<string, keyof GeneralData> = {
+  "Desde": "desde",
+  "Até": "ate",
+  "Campanha": "campanha",
+  "Título do anúncio patrocinado": "tituloAnuncio",
+  "Código do anúncio": "codigoAnuncio",
+  "Status": "status",
+  "Impressões": "impressoes",
+  "Cliques": "cliques",
+  "CPC\n(Custo por clique)": "cpc",
+  "CPC (Custo por clique)": "cpc",
+  "CTR\n(Click Through Rate)": "ctr",
+  "CTR (Click Through Rate)": "ctr",
+  "CVR\n(Conversion rate)": "cvr",
+  "CVR (Conversion rate)": "cvr",
+  "Receita\n(Moeda local)": "receita",
+  "Receita (Moeda local)": "receita",
+  "Investimento\n(Moeda local)": "investimento",
+  "Investimento (Moeda local)": "investimento",
+  "ACOS\n(Investimento / Receitas)": "acos",
+  "ACOS (Investimento / Receitas)": "acos",
+  "ROAS\n(Receitas / Investimento)": "roas",
+  "ROAS (Receitas / Investimento)": "roas",
+  "Vendas diretas": "vendasDiretas",
+  "Vendas indiretas": "vendasIndiretas",
+  "Vendas por publicidade\n(Diretas + Indiretas)": "vendasPublicidade",
+  "Vendas por publicidade (Diretas + Indiretas)": "vendasPublicidade",
+  "Receita por vendas diretas\n(Moeda Local)": "receitaVendasDiretas",
+  "Receita por vendas diretas (Moeda Local)": "receitaVendasDiretas",
+  "Receita por vendas indiretas": "receitaVendasIndiretas",
+};
+
+const ANALISE_HEADERS: Record<string, keyof CampaignData> = {
+  "ID Campaña": "idCampanha",
+  "Nombre campaña": "campanha",
+  "Prints": "prints",
+  "Última modificación campaña": "ultimaModificacao",
+  "Ingresos por PAds": "receita",
+  "Inversión PAds": "investimento",
+  "ACOS real": "acosReal",
+  "Último Budget": "orcamentoAtual",
+  "Budget promedio diario": "budgetPromedioDiario",
+  "Budget sugerido": "orcamentoSugerido",
+  "# Días topada": "diasTopada",
+  "# Días con prints": "diasComPrints",
+  "% Días topados": "pctDiasTopados",
+  "Acos Target": "acosTarget",
+  "ACOS Competencia": "acosCompetencia",
+  "Desvío ACOS Target-Competencia": "desvioAcos",
+  "Clicks": "cliques",
+  "LISB": "lisb",
+  "LISR": "lisr",
+  "% Won": "percentWon",
+  "ROAS": "roas",
+  "ROAS Objetivo": "roasObjetivo",
+};
+
+// ============================
+// Export header arrays (exact column order for re-upload)
+// ============================
+
+export const GENERAL_EXPORT_HEADERS = [
+  "Desde",
+  "Até",
+  "Campanha",
+  "Título do anúncio patrocinado",
+  "Código do anúncio",
+  "Status",
+  "Impressões",
+  "Cliques",
+  "CPC\n(Custo por clique)",
+  "CTR\n(Click Through Rate)",
+  "CVR\n(Conversion rate)",
+  "Receita\n(Moeda local)",
+  "Investimento\n(Moeda local)",
+  "ACOS\n(Investimento / Receitas)",
+  "ROAS\n(Receitas / Investimento)",
+  "Vendas diretas",
+  "Vendas indiretas",
+  "Vendas por publicidade\n(Diretas + Indiretas)",
+  "Receita por vendas diretas\n(Moeda Local)",
+  "Receita por vendas indiretas",
 ];
+
+export const ANALISE_EXPORT_HEADERS = [
+  "ID Campaña",
+  "Nombre campaña",
+  "Prints",
+  "Última modificación campaña",
+  "Ingresos por PAds",
+  "Inversión PAds",
+  "ACOS real",
+  "Último Budget",
+  "Budget promedio diario",
+  "Budget sugerido",
+  "# Días topada",
+  "# Días con prints",
+  "% Días topados",
+  "Acos Target",
+  "ACOS Competencia",
+  "Desvío ACOS Target-Competencia",
+  "Clicks",
+  "LISB",
+  "LISR",
+  "% Won",
+  "ROAS",
+  "ROAS Objetivo",
+];
+
+// ============================
+// Parsing helpers
+// ============================
+
+function parseNumber(val: any): number {
+  if (val == null) return 0;
+  if (typeof val === "number") return val;
+  const str = String(val).replace(/[$%,]/g, "").replace(",", ".").trim();
+  return Number(str) || 0;
+}
+
+function findHeader(rowKeys: string[], headerMap: Record<string, string>): Map<string, string> {
+  const mapping = new Map<string, string>();
+  for (const rk of rowKeys) {
+    // Exact match first
+    if (headerMap[rk]) {
+      mapping.set(rk, headerMap[rk]);
+      continue;
+    }
+    // Normalized match (trim, collapse whitespace)
+    const norm = rk.replace(/\s+/g, " ").trim();
+    if (headerMap[norm]) {
+      mapping.set(rk, headerMap[norm]);
+      continue;
+    }
+    // Partial match
+    for (const [hk, field] of Object.entries(headerMap)) {
+      const hNorm = hk.replace(/\s+/g, " ").trim().toLowerCase();
+      if (norm.toLowerCase().includes(hNorm) || hNorm.includes(norm.toLowerCase())) {
+        mapping.set(rk, field);
+        break;
+      }
+    }
+  }
+  return mapping;
+}
+
+export function parseGeneralXLSX(rows: any[]): GeneralData[] {
+  if (rows.length === 0) return [];
+  const keys = Object.keys(rows[0]);
+  const mapping = findHeader(keys, GENERAL_HEADERS as Record<string, string>);
+
+  return rows.map((row) => {
+    const obj: any = {
+      desde: "", ate: "", campanha: "", tituloAnuncio: "", codigoAnuncio: "",
+      status: "", impressoes: 0, cliques: 0, cpc: 0, ctr: 0, cvr: 0,
+      receita: 0, investimento: 0, acos: 0, roas: 0, vendasDiretas: 0,
+      vendasIndiretas: 0, vendasPublicidade: 0, receitaVendasDiretas: 0,
+      receitaVendasIndiretas: 0,
+    };
+    for (const [colName, field] of mapping) {
+      const val = row[colName];
+      if (["desde", "ate", "campanha", "tituloAnuncio", "codigoAnuncio", "status"].includes(field)) {
+        obj[field] = String(val ?? "");
+      } else {
+        obj[field] = parseNumber(val);
+      }
+    }
+    return obj as GeneralData;
+  });
+}
+
+export function parseAnaliseXLSX(rows: any[]): CampaignData[] {
+  if (rows.length === 0) return [];
+  const keys = Object.keys(rows[0]);
+  const mapping = findHeader(keys, ANALISE_HEADERS as Record<string, string>);
+
+  return rows.map((row) => {
+    const obj: any = {
+      idCampanha: "", campanha: "", prints: 0, ultimaModificacao: "",
+      receita: 0, investimento: 0, acosReal: 0, orcamentoAtual: 0,
+      budgetPromedioDiario: 0, orcamentoSugerido: 0, diasTopada: 0,
+      diasComPrints: 0, pctDiasTopados: 0, acosTarget: 0, acosCompetencia: 0,
+      desvioAcos: "", cliques: 0, lisb: 0, lisr: 0, percentWon: 0,
+      roas: 0, roasObjetivo: 0, conversoes: 0,
+    };
+    for (const [colName, field] of mapping) {
+      const val = row[colName];
+      if (["idCampanha", "campanha", "ultimaModificacao", "desvioAcos"].includes(field)) {
+        obj[field] = String(val ?? "");
+      } else {
+        obj[field] = parseNumber(val);
+      }
+    }
+    // Compute ROAS if missing
+    if (!obj.roas && obj.investimento > 0) {
+      obj.roas = obj.receita / obj.investimento;
+    }
+    return obj as CampaignData;
+  });
+}
+
+// ============================
+// Compute metrics from Análise data
+// ============================
 
 export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
   const factor = 1 + budgetIncrease / 100;
 
   const totalReceitaAtual = data.reduce((s, c) => s + c.receita, 0);
   const totalInvestimentoAtual = data.reduce((s, c) => s + c.investimento, 0);
-  const totalConversoesAtual = data.reduce((s, c) => s + c.conversoes, 0);
 
   const campaigns = data.map((c) => {
     const novoInvestimento = c.investimento * factor;
@@ -52,19 +278,16 @@ export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
     const vendasPorClique = c.cliques > 0 ? c.conversoes / c.cliques : 0;
 
     // LISB = Lost Impression Share by Budget (percentage)
-    // Lost impressions = current impressions * (LISB / (100 - LISB))
     const impressoesPerdidas = c.lisb > 0 && c.lisb < 100
       ? c.prints * (c.lisb / (100 - c.lisb))
       : 0;
     const ctr = c.prints > 0 ? c.cliques / c.prints : 0;
     const cliquesPerdidos = impressoesPerdidas * ctr;
-    const cliquesRecuperaveis = cliquesPerdidos; // alias for backward compat
+    const cliquesRecuperaveis = cliquesPerdidos;
     const vendasRecuperaveis = Math.round(cliquesRecuperaveis * vendasPorClique);
     const ticketMedio = c.conversoes > 0 ? c.receita / c.conversoes : 0;
     const receitaRecuperavel = vendasRecuperaveis * ticketMedio;
     const orcamentoAdicional = Math.max(0, c.orcamentoSugerido - c.orcamentoAtual);
-
-    // Budget pacing: ratio of current vs suggested budget
     const budgetPacing = c.orcamentoSugerido > 0 ? (c.orcamentoAtual / c.orcamentoSugerido) * 100 : 100;
 
     return {
@@ -90,6 +313,7 @@ export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
   const totalReceitaProjetada = campaigns.reduce((s, c) => s + c.novaReceita, 0);
   const totalInvestimentoProjetado = campaigns.reduce((s, c) => s + c.novoInvestimento, 0);
   const totalVendasAdicionais = campaigns.reduce((s, c) => s + c.vendasAdicionais, 0);
+  const totalConversoesAtual = data.reduce((s, c) => s + c.conversoes, 0);
   const crescimentoAbsoluto = totalReceitaProjetada - totalReceitaAtual;
   const crescimentoPct = totalReceitaAtual > 0 ? ((totalReceitaProjetada - totalReceitaAtual) / totalReceitaAtual) * 100 : 0;
   const investimentoAdicional = totalInvestimentoProjetado - totalInvestimentoAtual;
@@ -128,5 +352,53 @@ export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
     totalOrcamentoAdicional,
     totalImpressoesPerdidas,
     totalCliquesPerdidos,
+  };
+}
+
+// ============================
+// Compute general overview metrics
+// ============================
+
+export function computeGeneralMetrics(data: GeneralData[]) {
+  const totalReceita = data.reduce((s, r) => s + r.receita, 0);
+  const totalInvestimento = data.reduce((s, r) => s + r.investimento, 0);
+  const totalCliques = data.reduce((s, r) => s + r.cliques, 0);
+  const totalImpressoes = data.reduce((s, r) => s + r.impressoes, 0);
+  const totalVendas = data.reduce((s, r) => s + r.vendasPublicidade, 0);
+  const roasGeral = totalInvestimento > 0 ? totalReceita / totalInvestimento : 0;
+  const acosGeral = totalReceita > 0 ? (totalInvestimento / totalReceita) * 100 : 0;
+  const ctrGeral = totalImpressoes > 0 ? (totalCliques / totalImpressoes) * 100 : 0;
+
+  // Group by campaign name
+  const byCampaign = new Map<string, { receita: number; investimento: number; cliques: number; impressoes: number; vendas: number }>();
+  for (const row of data) {
+    const key = row.campanha || "Sem campanha";
+    const existing = byCampaign.get(key) || { receita: 0, investimento: 0, cliques: 0, impressoes: 0, vendas: 0 };
+    existing.receita += row.receita;
+    existing.investimento += row.investimento;
+    existing.cliques += row.cliques;
+    existing.impressoes += row.impressoes;
+    existing.vendas += row.vendasPublicidade;
+    byCampaign.set(key, existing);
+  }
+
+  const campaignSummaries = Array.from(byCampaign.entries()).map(([name, v]) => ({
+    campanha: name,
+    ...v,
+    roas: v.investimento > 0 ? v.receita / v.investimento : 0,
+    acos: v.receita > 0 ? (v.investimento / v.receita) * 100 : 0,
+  }));
+
+  return {
+    totalReceita,
+    totalInvestimento,
+    totalCliques,
+    totalImpressoes,
+    totalVendas,
+    roasGeral,
+    acosGeral,
+    ctrGeral,
+    campaignSummaries,
+    totalRows: data.length,
   };
 }
