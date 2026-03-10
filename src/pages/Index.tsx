@@ -11,7 +11,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { BudgetOpportunity } from "@/components/BudgetOpportunity";
 import { CampaignData, demoData, computeMetrics } from "@/lib/demoData";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { FileDown, Upload, Download, ChevronDown } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export default function Index() {
@@ -40,7 +41,6 @@ export default function Index() {
     for (const k of keys) {
       if (row[k] !== undefined) return row[k];
     }
-    // Fuzzy match: check if any key in row contains one of our search terms
     const rowKeys = Object.keys(row);
     for (const k of keys) {
       const lower = k.toLowerCase();
@@ -61,7 +61,6 @@ export default function Index() {
       const json: any[] = XLSX.utils.sheet_to_json(ws);
 
       const rows = json.map((row: any) => {
-        // Map columns - support both PT-BR and ES formats
         const campanha = String(
           findCol(row, "Nombre campaña", "Nombre campaña", "Campanha", "campanha", "Campaign") || ""
         ).trim();
@@ -72,44 +71,26 @@ export default function Index() {
         const investimento = parseNumber(
           findCol(row, "Inversión PAds", "Investimento\n(Moeda local)", "Investimento (Moeda local)", "Investimento", "investimento")
         );
-        const cliques = parseNumber(
-          findCol(row, "Clicks", "Cliques", "cliques")
-        );
-        const prints = parseNumber(
-          findCol(row, "Prints", "Impressões", "impressoes")
-        );
-        const percentWon = parseNumber(
-          findCol(row, "% Won", "% Impressões ganhas")
-        );
-        const lisb = parseNumber(
-          findCol(row, "LISB", "Lost Impression Share Budget", "Impressões perdidas por orçamento")
-        );
-        const orcamentoAtual = parseNumber(
-          findCol(row, "Último Budget", "Budget promedio diario", "Orçamento atual")
-        );
-        const orcamentoSugerido = parseNumber(
-          findCol(row, "Budget sugerido", "Orçamento recomendado")
-        );
-        const diasTopada = parseNumber(
-          findCol(row, "# Días topada", "Dias topada")
-        );
-        const diasComPrints = parseNumber(
-          findCol(row, "# Días con prints", "Dias com impressões")
-        );
-        const pctDiasTopados = parseNumber(
-          findCol(row, "% Días topados", "% Dias topados")
-        );
-        const roasObjetivo = parseNumber(
-          findCol(row, "ROAS Objetivo", "ROAS objetivo")
-        );
-        const acosReal = parseNumber(
-          findCol(row, "ACOS real", "ACOS Real")
-        );
-        const acosTarget = parseNumber(
-          findCol(row, "Acos Target", "ACOS Target")
-        );
+        const cliques = parseNumber(findCol(row, "Clicks", "Cliques", "cliques"));
+        const prints = parseNumber(findCol(row, "Prints", "Impressões", "impressoes"));
+        const percentWon = parseNumber(findCol(row, "% Won", "% Impressões ganhas"));
+        const lisb = parseNumber(findCol(row, "LISB", "Lost Impression Share Budget", "Impressões perdidas por orçamento"));
+        const lisr = parseNumber(findCol(row, "LISR", "Lost Impression Share Rank"));
+        const orcamentoAtual = parseNumber(findCol(row, "Último Budget", "Budget promedio diario", "Orçamento atual"));
+        const orcamentoSugerido = parseNumber(findCol(row, "Budget sugerido", "Orçamento recomendado"));
+        const diasTopada = parseNumber(findCol(row, "# Días topada", "Dias topada"));
+        const diasComPrints = parseNumber(findCol(row, "# Días con prints", "Dias com impressões"));
+        const pctDiasTopados = parseNumber(findCol(row, "% Días topados", "% Dias topados"));
+        const roasObjetivo = parseNumber(findCol(row, "ROAS Objetivo", "ROAS objetivo"));
+        const acosReal = parseNumber(findCol(row, "ACOS real", "ACOS Real"));
+        const acosTarget = parseNumber(findCol(row, "Acos Target", "ACOS Target"));
+        const acosCompetencia = parseNumber(findCol(row, "ACOS Competencia", "ACOS Competência"));
+        const desvioAcos = parseNumber(findCol(row, "Desvío ACOS Target-Competencia", "Desvío ACOS"));
+        const statusCampanha = String(findCol(row, "Status actual campaña", "Status") || "");
+        const idCampanha = String(findCol(row, "ID Campaña", "ID") || "");
+        const ultimaModificacao = String(findCol(row, "Última modificación campaña", "Última modificação") || "");
+        const budgetPromedioDiario = parseNumber(findCol(row, "Budget promedio diario"));
 
-        // Conversions: from various sources
         const vendasDiretas = parseNumber(findCol(row, "Vendas diretas"));
         const vendasIndiretas = parseNumber(findCol(row, "Vendas indiretas"));
         const vendasPublicidade = parseNumber(
@@ -128,6 +109,7 @@ export default function Index() {
           prints,
           percentWon,
           lisb,
+          lisr,
           orcamentoAtual,
           orcamentoSugerido,
           diasTopada,
@@ -136,6 +118,12 @@ export default function Index() {
           roasObjetivo,
           acosReal,
           acosTarget,
+          acosCompetencia,
+          desvioAcos,
+          statusCampanha,
+          idCampanha,
+          ultimaModificacao,
+          budgetPromedioDiario,
         } as CampaignData;
       });
 
@@ -152,14 +140,12 @@ export default function Index() {
           existing.prints += r.prints;
           existing.diasTopada = Math.max(existing.diasTopada, r.diasTopada);
           existing.diasComPrints = Math.max(existing.diasComPrints, r.diasComPrints);
-          // Keep the highest budget values
           existing.orcamentoAtual = Math.max(existing.orcamentoAtual, r.orcamentoAtual);
           existing.orcamentoSugerido = Math.max(existing.orcamentoSugerido, r.orcamentoSugerido);
-          // Keep weighted % won (by prints)
-          // For simplicity, take the average after grouping
           existing.pctDiasTopados = Math.max(existing.pctDiasTopados, r.pctDiasTopados);
           existing.percentWon = Math.max(existing.percentWon, r.percentWon);
           existing.lisb = Math.max(existing.lisb, r.lisb);
+          existing.lisr = Math.max(existing.lisr, r.lisr);
         } else {
           grouped.set(r.campanha, { ...r });
         }
@@ -193,6 +179,74 @@ export default function Index() {
       .from(dashboardRef.current)
       .save();
   }, [clientName, budgetIncrease]);
+
+  // Export XLSX - General Model (mirrors the import template)
+  const handleExportGeneral = useCallback(() => {
+    if (!data || !metrics) return;
+    const exportData = metrics.campaigns.map((c) => ({
+      "ID Campaña": c.idCampanha || "",
+      "Nombre campaña": c.campanha,
+      "Status actual campaña": c.statusCampanha || "",
+      "Última modificación campaña": c.ultimaModificacao || "",
+      "Ingresos por PAds": c.receita,
+      "Inversión PAds": c.investimento,
+      "ACOS real": c.acosReal,
+      "Último Budget": c.orcamentoAtual,
+      "Budget promedio diario": c.budgetPromedioDiario || c.orcamentoAtual,
+      "Budget sugerido": c.orcamentoSugerido,
+      "# Días topada": c.diasTopada,
+      "# Días con prints": c.diasComPrints,
+      "% Días topados": c.pctDiasTopados,
+      "Acos Target": c.acosTarget,
+      "ACOS Competencia": c.acosCompetencia || 0,
+      "Desvío ACOS Target-Competencia": c.desvioAcos || 0,
+      "Prints": c.prints,
+      "Clicks": c.cliques,
+      "LISB": c.lisb,
+      "LISR": c.lisr || 0,
+      "% Won": c.percentWon,
+      "ROAS": c.roas,
+      "ROAS Objetivo": c.roasObjetivo,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Informações Gerais");
+    XLSX.writeFile(wb, `Modelo_Geral_${clientName.replace(/\s/g, "_")}.xlsx`);
+  }, [data, clientName]);
+
+  // Export XLSX - Opportunities Model
+  const handleExportOportunidades = useCallback(() => {
+    if (!data || !metrics) return;
+    const exportData = metrics.campaigns
+      .filter((c) => c.impressoesPerdidas > 0)
+      .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel)
+      .map((c) => ({
+        "Nombre campaña": c.campanha,
+        "LISB": c.lisb,
+        "Prints": c.prints,
+        "Impressões Perdidas": Math.round(c.impressoesPerdidas),
+        "Clicks": c.cliques,
+        "CTR %": (c.ctr * 100).toFixed(2),
+        "Cliques Perdidos": Math.round(c.cliquesPerdidos),
+        "Conversões": c.conversoes,
+        "Vendas Recuperáveis": c.vendasRecuperaveis,
+        "Ticket Médio": c.ticketMedio.toFixed(2),
+        "Receita Recuperável": c.receitaRecuperavel.toFixed(2),
+        "Último Budget": c.orcamentoAtual,
+        "Budget sugerido": c.orcamentoSugerido,
+        "Orçamento Adicional Diário": c.orcamentoAdicional.toFixed(2),
+        "% Días topados": c.pctDiasTopados,
+        "ROAS": c.roas.toFixed(2),
+        "ACOS real": c.acosReal,
+        "ROAS Objetivo": c.roasObjetivo,
+      }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Oportunidades");
+    XLSX.writeFile(wb, `Modelo_Oportunidades_${clientName.replace(/\s/g, "_")}.xlsx`);
+  }, [data, clientName]);
 
   const metrics = useMemo(() => {
     if (!data) return null;
@@ -251,19 +305,41 @@ export default function Index() {
                 totalReceitaRecuperavel={metrics.totalReceitaRecuperavel}
                 totalOrcamentoAdicional={metrics.totalOrcamentoAdicional}
                 totalImpressoesPerdidas={metrics.totalImpressoesPerdidas}
+                totalCliquesPerdidos={metrics.totalCliquesPerdidos}
                 roasMedio={metrics.roasMedio}
+                acosMedio={metrics.acosMedio}
               />
 
-              {/* Import button above strategic table */}
-              <div className="flex justify-end">
+              {/* Action bar above strategic table */}
+              <div className="flex justify-end gap-2">
                 <Button
                   onClick={handleUpload}
                   variant="outline"
                   className="gap-2"
                 >
-                  <FileDown className="h-4 w-4 rotate-180" />
+                  <Upload className="h-4 w-4" />
                   Importar Planilha
                 </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      Exportar XLSX
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportGeneral} className="gap-2 cursor-pointer">
+                      <FileDown className="h-4 w-4" />
+                      Exportar Modelo Geral
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportOportunidades} className="gap-2 cursor-pointer">
+                      <FileDown className="h-4 w-4" />
+                      Exportar Modelo Oportunidades
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               <TabelaEstrategica
