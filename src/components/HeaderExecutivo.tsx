@@ -1,19 +1,33 @@
 import { motion } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
-import { Upload, FileSpreadsheet, Sparkles } from "lucide-react";
+import { Upload, FileSpreadsheet, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   clientName: string;
   budgetIncrease: number;
   onBudgetChange: (v: number) => void;
-  onUpload: () => void;
-  onDemo: () => void;
+  onUploadGeneral: () => void;
+  onUploadAnalise: () => void;
   onExportPdf: () => void;
   hasData: boolean;
+  hasGeneralData: boolean;
+  hasAnaliseData: boolean;
 }
 
-export function HeaderExecutivo({ clientName, budgetIncrease, onBudgetChange, onUpload, onDemo, onExportPdf, hasData }: Props) {
+export function HeaderExecutivo({
+  clientName,
+  budgetIncrease,
+  onBudgetChange,
+  onUploadGeneral,
+  onUploadAnalise,
+  onExportPdf,
+  hasData,
+  hasGeneralData,
+  hasAnaliseData,
+}: Props) {
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -39,16 +53,34 @@ export function HeaderExecutivo({ clientName, budgetIncrease, onBudgetChange, on
           </div>
 
           <div className="flex items-center gap-3">
-            {!hasData && (
-              <Button variant="outline" size="sm" onClick={onDemo} className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                Dados de demonstração
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={onUpload} className="gap-2">
-              <Upload className="h-4 w-4" />
-              Importar XLSX
-            </Button>
+            {/* Import dropdown with status badges */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Importar XLSX
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72">
+                <DropdownMenuItem onClick={onUploadGeneral} className="gap-3 cursor-pointer py-3">
+                  <FileSpreadsheet className="h-4 w-4 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Dados Gerais</p>
+                    <p className="text-xs text-muted-foreground truncate">modelo_ads_manager_dados_gerais</p>
+                  </div>
+                  {hasGeneralData && <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onUploadAnalise} className="gap-3 cursor-pointer py-3">
+                  <FileSpreadsheet className="h-4 w-4 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Análise de Campanhas</p>
+                    <p className="text-xs text-muted-foreground truncate">Modelo_analise_campanhas</p>
+                  </div>
+                  {hasAnaliseData && <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {hasData && (
               <Button size="sm" onClick={onExportPdf} className="gap-2">
                 <FileSpreadsheet className="h-4 w-4" />

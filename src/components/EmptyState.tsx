@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
-import { Upload, Sparkles, BarChart3 } from "lucide-react";
+import { Upload, BarChart3, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  onUpload: () => void;
-  onDemo: () => void;
+  onUploadGeneral: () => void;
+  onUploadAnalise: () => void;
 }
 
-export function EmptyState({ onUpload, onDemo }: Props) {
+export function EmptyState({ onUploadGeneral, onUploadAnalise }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -20,17 +20,31 @@ export function EmptyState({ onUpload, onDemo }: Props) {
       </div>
       <h2 className="text-2xl font-bold text-foreground mb-2">Ads Growth Simulator PRO</h2>
       <p className="text-muted-foreground mb-8 max-w-md">
-        Simule quanto sua conta pode crescer ao aumentar o orçamento das campanhas. Importe seus dados ou use os dados de demonstração.
+        Importe suas planilhas para começar. São dois modelos de dados distintos que alimentam seções diferentes do painel.
       </p>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button size="lg" onClick={onDemo} className="gap-2">
-          <Sparkles className="h-4 w-4" />
-          Usar dados de demonstração
-        </Button>
-        <Button size="lg" variant="outline" onClick={onUpload} className="gap-2">
-          <Upload className="h-4 w-4" />
-          Importar planilha XLSX
-        </Button>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="glass-card p-6 space-y-3 text-center max-w-xs">
+          <FileSpreadsheet className="h-8 w-8 text-primary mx-auto" />
+          <h3 className="font-semibold text-foreground text-sm">Visão Geral</h3>
+          <p className="text-xs text-muted-foreground">
+            modelo_ads_manager_dados_gerais
+          </p>
+          <Button size="sm" variant="outline" onClick={onUploadGeneral} className="gap-2 w-full">
+            <Upload className="h-4 w-4" />
+            Importar Dados Gerais
+          </Button>
+        </div>
+        <div className="glass-card p-6 space-y-3 text-center max-w-xs">
+          <FileSpreadsheet className="h-8 w-8 text-amber-500 mx-auto" />
+          <h3 className="font-semibold text-foreground text-sm">Análise de Campanhas</h3>
+          <p className="text-xs text-muted-foreground">
+            Modelo_analise_campanhas
+          </p>
+          <Button size="sm" onClick={onUploadAnalise} className="gap-2 w-full">
+            <Upload className="h-4 w-4" />
+            Importar Análise
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
