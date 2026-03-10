@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Target, TrendingUp, ShoppingCart, DollarSign, Eye, AlertTriangle } from "lucide-react";
+import { Target, MousePointerClick } from "lucide-react";
 import { CountUp } from "./CountUp";
 import { Badge } from "@/components/ui/badge";
 
@@ -11,17 +11,21 @@ interface CampaignOpp {
   cliques: number;
   conversoes: number;
   receita: number;
+  investimento: number;
   orcamentoAtual: number;
   orcamentoSugerido: number;
   pctDiasTopados: number;
   impressoesPerdidas: number;
   ctr: number;
+  cliquesPerdidos: number;
   cliquesRecuperaveis: number;
   vendasRecuperaveis: number;
   receitaRecuperavel: number;
   orcamentoAdicional: number;
   ticketMedio: number;
   roas: number;
+  acosReal: number;
+  roasObjetivo: number;
 }
 
 interface Props {
@@ -30,7 +34,9 @@ interface Props {
   totalReceitaRecuperavel: number;
   totalOrcamentoAdicional: number;
   totalImpressoesPerdidas: number;
+  totalCliquesPerdidos: number;
   roasMedio: number;
+  acosMedio: number;
 }
 
 export function BudgetOpportunity({
@@ -39,7 +45,9 @@ export function BudgetOpportunity({
   totalReceitaRecuperavel,
   totalOrcamentoAdicional,
   totalImpressoesPerdidas,
+  totalCliquesPerdidos,
   roasMedio,
+  acosMedio,
 }: Props) {
   const fmt = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -66,37 +74,52 @@ export function BudgetOpportunity({
         <div>
           <h3 className="text-lg font-semibold text-foreground">Oportunidade por Impressões Perdidas</h3>
           <p className="text-sm text-muted-foreground">
-            Potencial de crescimento baseado em impressões perdidas por orçamento e taxa de conversão por campanha
+            Potencial de crescimento baseado em LISB e taxa de conversão por campanha
           </p>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4 text-center space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Impressões perdidas</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Impressões Perdidas</p>
           <p className="text-xl font-bold text-amber-600">
             <CountUp value={totalImpressoesPerdidas} />
           </p>
         </div>
+        <div className="rounded-xl bg-orange-500/5 border border-orange-500/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-1">
+            <MousePointerClick className="h-3 w-3" /> Cliques Perdidos
+          </p>
+          <p className="text-xl font-bold text-orange-600">
+            <CountUp value={totalCliquesPerdidos} />
+          </p>
+        </div>
         <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendas recuperáveis</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendas Recuperáveis</p>
           <p className="text-xl font-bold text-emerald-600">
             <CountUp value={totalVendasRecuperaveis} prefix="+" />
           </p>
         </div>
         <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-4 text-center space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Receita recuperável</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Receita Recuperável</p>
           <p className="text-xl font-bold text-emerald-600">
             <CountUp value={totalReceitaRecuperavel} prefix="R$ " />
           </p>
         </div>
         <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Investimento necessário</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Investimento Necessário</p>
           <p className="text-xl font-bold text-primary">
             <CountUp value={totalOrcamentoAdicional * 30} prefix="R$ " />
           </p>
           <p className="text-xs text-muted-foreground">/mês (diário × 30)</p>
+        </div>
+        <div className="rounded-xl bg-blue-500/5 border border-blue-500/10 p-4 text-center space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">ROAS / ACOS Médio</p>
+          <p className="text-lg font-bold text-blue-600">
+            {roasMedio.toFixed(1)}x
+          </p>
+          <p className="text-xs text-muted-foreground">ACOS {acosMedio.toFixed(1)}%</p>
         </div>
       </div>
 
@@ -108,9 +131,10 @@ export function BudgetOpportunity({
       >
         <p className="text-sm text-foreground">
           <span className="font-semibold text-amber-600">💡 Insight:</span>{" "}
-          Existem <span className="font-semibold">{totalImpressoesPerdidas.toLocaleString("pt-BR")}</span> impressões perdidas por orçamento
-          em {campaignsWithOpp.length} campanhas. Ajustando o budget diário de cada campanha para o valor sugerido,
-          é possível recuperar até{" "}
+          Existem <span className="font-semibold">{totalImpressoesPerdidas.toLocaleString("pt-BR")}</span> impressões
+          e <span className="font-semibold text-orange-600">{Math.round(totalCliquesPerdidos).toLocaleString("pt-BR")}</span> cliques
+          perdidos por orçamento em {campaignsWithOpp.length} campanhas. Com ROAS médio de{" "}
+          <span className="font-semibold">{roasMedio.toFixed(1)}x</span>, vale recuperar até{" "}
           <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
           e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.
         </p>
@@ -124,6 +148,9 @@ export function BudgetOpportunity({
               <th className="text-left font-medium text-muted-foreground px-4 py-3">Campanha</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">LISB %</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Impr. Perdidas</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Cliques Perdidos</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">ROAS</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">ACOS</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Atual</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Sugerido</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Vendas Recup.</th>
@@ -139,7 +166,7 @@ export function BudgetOpportunity({
                   ? "bg-destructive/10 text-destructive"
                   : priority === "Média"
                   ? "bg-amber-500/10 text-amber-600"
-                  : "bg-muted text-muted-foreground";
+                  : "bg-muted/20 text-muted-foreground";
 
               return (
                 <tr key={c.campanha} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
@@ -148,6 +175,11 @@ export function BudgetOpportunity({
                   <td className="px-3 py-3 text-right tabular-nums text-amber-600">
                     {Math.round(c.impressoesPerdidas).toLocaleString("pt-BR")}
                   </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-orange-600">
+                    {Math.round(c.cliquesPerdidos).toLocaleString("pt-BR")}
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums">{c.roas.toFixed(1)}x</td>
+                  <td className="px-3 py-3 text-right tabular-nums">{c.acosReal.toFixed(1)}%</td>
                   <td className="px-3 py-3 text-right tabular-nums">{fmt(c.orcamentoAtual)}</td>
                   <td className="px-3 py-3 text-right tabular-nums font-medium">{fmt(c.orcamentoSugerido)}</td>
                   <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">+{c.vendasRecuperaveis}</td>
