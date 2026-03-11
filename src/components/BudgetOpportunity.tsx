@@ -19,6 +19,7 @@ interface CampaignOpp {
   ctr: number;
   cliquesPerdidos: number;
   cliquesRecuperaveis: number;
+  cliquesPorVenda: number;
   vendasRecuperaveis: number;
   receitaRecuperavel: number;
   orcamentoAdicional: number;
