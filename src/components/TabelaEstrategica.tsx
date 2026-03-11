@@ -111,6 +111,33 @@ export function TabelaEstrategica({ campaigns, roasMedio, budgetIncrease }: Prop
             <MousePointerClick className="h-3 w-3" />
             Maior Oportunidade de Cliques
           </Button>
+          <Button
+            variant={quickFilter === "maiorLisb" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("maiorLisb")}
+            className="text-xs h-7 gap-1"
+          >
+            Campanha com Maior LISB
+          </Button>
+          <Button
+            variant={quickFilter === "maiorVendas" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("maiorVendas")}
+            className="text-xs h-7 gap-1"
+          >
+            Maior Oportunidades de Vendas
+          </Button>
+          <Button
+            variant={quickFilter === "melhorRoas" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("melhorRoas")}
+            className="text-xs h-7 gap-1"
+          >
+            Campanhas com Melhor ROAS
+          </Button>
+            <MousePointerClick className="h-3 w-3" />
+            Maior Oportunidade de Cliques
+          </Button>
         </div>
       </div>
 
