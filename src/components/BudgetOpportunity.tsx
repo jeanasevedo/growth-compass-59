@@ -156,6 +156,7 @@ export function BudgetOpportunity({
               <th className="text-right font-medium text-muted-foreground px-3 py-3">LISB %</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Impr. Perdidas</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Cliques Perdidos</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Cliques/Venda</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">ROAS</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">ACOS</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Atual</th>
