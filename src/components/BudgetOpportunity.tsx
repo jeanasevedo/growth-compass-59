@@ -136,9 +136,14 @@ export function BudgetOpportunity({
           Existem <span className="font-semibold">{totalImpressoesPerdidas.toLocaleString("pt-BR")}</span> impressões
           e <span className="font-semibold text-orange-600">{Math.round(totalCliquesPerdidos).toLocaleString("pt-BR")}</span> cliques
           perdidos por orçamento em {campaignsWithOpp.length} campanhas. Com ROAS médio de{" "}
-          <span className="font-semibold">{roasMedio.toFixed(1)}x</span>, vale recuperar até{" "}
-          <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
-          e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.
+          <span className="font-semibold">{roasMedio.toFixed(1)}x</span>
+          {hasConversions ? (
+            <>, vale recuperar até{" "}
+            <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
+            e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.</>
+          ) : (
+            <>. <span className="text-muted-foreground italic">Importe também o arquivo de Dados Gerais para calcular vendas e receita recuperáveis.</span></>
+          )}
         </p>
       </motion.div>
 
