@@ -21,6 +21,7 @@ interface CampaignRow {
   orcamentoSugerido: number;
   pctDiasTopados: number;
   budgetPacing: number;
+  vendasRecuperaveis: number;
 }
 
 interface Props {
@@ -29,7 +30,7 @@ interface Props {
   budgetIncrease: number;
 }
 
-type QuickFilter = "none" | "top10budget" | "topCliques";
+type QuickFilter = "none" | "top10budget" | "topCliques" | "maiorLisb" | "maiorVendas" | "melhorRoas";
 
 function getEscalabilidade(roas: number, roasMedio: number) {
   if (roas >= roasMedio * 1.3) return { label: "Alta", variant: "success" as const };
@@ -48,10 +49,22 @@ export function TabelaEstrategica({ campaigns, roasMedio, budgetIncrease }: Prop
 
   const filtered = useMemo(() => {
     let list = [...campaigns];
-    if (quickFilter === "top10budget") {
-      list = list.sort((a, b) => b.lisb - a.lisb).slice(0, 10);
-    } else if (quickFilter === "topCliques") {
-      list = list.sort((a, b) => b.cliquesPerdidos - a.cliquesPerdidos);
+    switch (quickFilter) {
+      case "top10budget":
+        list = list.sort((a, b) => b.lisb - a.lisb).slice(0, 10);
+        break;
+      case "topCliques":
+        list = list.sort((a, b) => b.cliquesPerdidos - a.cliquesPerdidos);
+        break;
+      case "maiorLisb":
+        list = list.sort((a, b) => b.lisb - a.lisb);
+        break;
+      case "maiorVendas":
+        list = list.sort((a, b) => b.vendasRecuperaveis - a.vendasRecuperaveis);
+        break;
+      case "melhorRoas":
+        list = list.sort((a, b) => b.roas - a.roas);
+        break;
     }
     return list;
   }, [campaigns, quickFilter]);
@@ -97,6 +110,30 @@ export function TabelaEstrategica({ campaigns, roasMedio, budgetIncrease }: Prop
           >
             <MousePointerClick className="h-3 w-3" />
             Maior Oportunidade de Cliques
+          </Button>
+          <Button
+            variant={quickFilter === "maiorLisb" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("maiorLisb")}
+            className="text-xs h-7 gap-1"
+          >
+            Campanha com Maior LISB
+          </Button>
+          <Button
+            variant={quickFilter === "maiorVendas" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("maiorVendas")}
+            className="text-xs h-7 gap-1"
+          >
+            Maior Oportunidades de Vendas
+          </Button>
+          <Button
+            variant={quickFilter === "melhorRoas" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickFilter("melhorRoas")}
+            className="text-xs h-7 gap-1"
+          >
+            Campanhas com Melhor ROAS
           </Button>
         </div>
       </div>
