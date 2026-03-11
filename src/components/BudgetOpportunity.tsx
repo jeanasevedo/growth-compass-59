@@ -186,6 +186,9 @@ export function BudgetOpportunity({
                   <td className="px-3 py-3 text-right tabular-nums text-orange-600">
                     {Math.round(c.cliquesPerdidos).toLocaleString("pt-BR")}
                   </td>
+                  <td className="px-3 py-3 text-right tabular-nums">
+                    {c.cliquesPorVenda > 0 ? c.cliquesPorVenda.toFixed(0) : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-3 py-3 text-right tabular-nums">{c.roas.toFixed(1)}x</td>
                   <td className="px-3 py-3 text-right tabular-nums">{c.acosReal.toFixed(1)}%</td>
                   <td className="px-3 py-3 text-right tabular-nums">{fmt(c.orcamentoAtual)}</td>
