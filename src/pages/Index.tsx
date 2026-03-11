@@ -254,14 +254,21 @@ export default function Index() {
                       />
                     </div>
                     <div className="xl:col-span-2">
-                      <DoughnutChart
-                        campaigns={generalMetrics.campaignSummaries.map((c) => ({
-                          campanha: c.campanha,
-                          faturamentoAdicional: c.receita * (budgetIncrease / 100),
-                        }))}
-                        top3Pct={0}
-                        top3Names={generalMetrics.campaignSummaries.slice(0, 3).map((c) => c.campanha)}
-                      />
+                    {(() => {
+                      const sorted = [...generalMetrics.campaignSummaries]
+                        .map((c) => ({ campanha: c.campanha, faturamentoAdicional: c.receita * (budgetIncrease / 100) }))
+                        .sort((a, b) => b.faturamentoAdicional - a.faturamentoAdicional);
+                      const totalFat = sorted.reduce((s, c) => s + c.faturamentoAdicional, 0);
+                      const top3Fat = sorted.slice(0, 3).reduce((s, c) => s + c.faturamentoAdicional, 0);
+                      const top3Pct = totalFat > 0 ? (top3Fat / totalFat) * 100 : 0;
+                      return (
+                        <DoughnutChart
+                          campaigns={sorted}
+                          top3Pct={top3Pct}
+                          top3Names={sorted.slice(0, 3).map((c) => c.campanha)}
+                        />
+                      );
+                    })()}
                     </div>
                   </div>
                 </>

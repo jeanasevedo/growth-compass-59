@@ -48,10 +48,22 @@ export function TabelaEstrategica({ campaigns, roasMedio, budgetIncrease }: Prop
 
   const filtered = useMemo(() => {
     let list = [...campaigns];
-    if (quickFilter === "top10budget") {
-      list = list.sort((a, b) => b.lisb - a.lisb).slice(0, 10);
-    } else if (quickFilter === "topCliques") {
-      list = list.sort((a, b) => b.cliquesPerdidos - a.cliquesPerdidos);
+    switch (quickFilter) {
+      case "top10budget":
+        list = list.sort((a, b) => b.lisb - a.lisb).slice(0, 10);
+        break;
+      case "topCliques":
+        list = list.sort((a, b) => b.cliquesPerdidos - a.cliquesPerdidos);
+        break;
+      case "maiorLisb":
+        list = list.sort((a, b) => b.lisb - a.lisb);
+        break;
+      case "maiorVendas":
+        list = list.sort((a, b) => b.vendasRecuperaveis - a.vendasRecuperaveis);
+        break;
+      case "melhorRoas":
+        list = list.sort((a, b) => b.roas - a.roas);
+        break;
     }
     return list;
   }, [campaigns, quickFilter]);

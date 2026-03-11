@@ -363,9 +363,11 @@ export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
     const cliquesPorVenda = c.conversoes > 0 ? c.cliques / c.conversoes : 0;
     const vendasPorClique = c.cliques > 0 ? c.conversoes / c.cliques : 0;
 
-    // LISB = Lost Impression Share by Budget (percentage)
-    const impressoesPerdidas = c.lisb > 0 && c.lisb < 100
-      ? c.prints * (c.lisb / (100 - c.lisb))
+    // Impressões Perdidas = based on % Won
+    // prints = impressions won. If %Won = 60%, total possible = prints / 0.6
+    // Lost = total - prints = prints * ((100 - percentWon) / percentWon)
+    const impressoesPerdidas = c.percentWon > 0 && c.percentWon < 100
+      ? c.prints * ((100 - c.percentWon) / c.percentWon)
       : 0;
     const ctr = c.prints > 0 ? c.cliques / c.prints : 0;
     const cliquesPerdidos = impressoesPerdidas * ctr;
