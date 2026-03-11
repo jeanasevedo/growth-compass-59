@@ -53,8 +53,10 @@ export function BudgetOpportunity({
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const campaignsWithOpp = campaigns
-    .filter((c) => c.impressoesPerdidas > 0 && c.orcamentoAdicional > 0)
-    .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel);
+    .filter((c) => c.impressoesPerdidas > 0)
+    .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel || b.cliquesPerdidos - a.cliquesPerdidos);
+  
+  const hasConversions = campaigns.some((c) => c.conversoes > 0);
 
   if (campaignsWithOpp.length === 0) {
     return null;
