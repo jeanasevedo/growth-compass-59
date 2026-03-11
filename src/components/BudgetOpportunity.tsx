@@ -193,7 +193,9 @@ export function BudgetOpportunity({
                   <td className="px-3 py-3 text-right tabular-nums">{c.acosReal.toFixed(1)}%</td>
                   <td className="px-3 py-3 text-right tabular-nums">{fmt(c.orcamentoAtual)}</td>
                   <td className="px-3 py-3 text-right tabular-nums font-medium">{fmt(c.orcamentoSugerido)}</td>
-                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">+{c.vendasRecuperaveis}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">
+                    {c.vendasRecuperaveis > 0 ? `+${c.vendasRecuperaveis}` : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">{fmt(c.receitaRecuperavel)}</td>
                   <td className="px-3 py-3 text-center">
                     <Badge variant="secondary" className={`border-0 ${priorityClass}`}>
