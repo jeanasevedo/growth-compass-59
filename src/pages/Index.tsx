@@ -16,6 +16,7 @@ import {
   parseAnaliseXLSX,
   computeMetrics,
   computeGeneralMetrics,
+  enrichWithConversions,
   GENERAL_EXPORT_HEADERS,
   ANALISE_EXPORT_HEADERS,
 } from "@/lib/demoData";
