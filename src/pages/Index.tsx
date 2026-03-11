@@ -16,6 +16,7 @@ import {
   parseAnaliseXLSX,
   computeMetrics,
   computeGeneralMetrics,
+  enrichWithConversions,
   GENERAL_EXPORT_HEADERS,
   ANALISE_EXPORT_HEADERS,
 } from "@/lib/demoData";
@@ -136,7 +137,7 @@ export default function Index() {
         switch (h) {
           case "ID Campaña": obj[h] = c.idCampanha; break;
           case "Nombre campaña": obj[h] = c.campanha; break;
-          case "Prints": obj[h] = c.prints; break;
+          case "Status actual campaña": obj[h] = c.statusCampanha; break;
           case "Última modificación campaña": obj[h] = c.ultimaModificacao; break;
           case "Ingresos por PAds": obj[h] = c.receita; break;
           case "Inversión PAds": obj[h] = c.investimento; break;
@@ -150,6 +151,7 @@ export default function Index() {
           case "Acos Target": obj[h] = c.acosTarget; break;
           case "ACOS Competencia": obj[h] = c.acosCompetencia; break;
           case "Desvío ACOS Target-Competencia": obj[h] = c.desvioAcos; break;
+          case "Prints": obj[h] = c.prints; break;
           case "Clicks": obj[h] = c.cliques; break;
           case "LISB": obj[h] = c.lisb; break;
           case "LISR": obj[h] = c.lisr; break;
@@ -166,11 +168,17 @@ export default function Index() {
     XLSX.writeFile(wb, `Modelo_analise_campanhas_${clientName.replace(/\s/g, "_")}.xlsx`);
   }, [analiseData, clientName]);
 
+  // Enrich análise data with conversions from general data
+  const enrichedAnaliseData = useMemo(() => {
+    if (!analiseData) return null;
+    return enrichWithConversions(analiseData, generalData);
+  }, [analiseData, generalData]);
+
   // Metrics from Análise data (feeds BudgetOpportunity + TabelaEstrategica)
   const analiseMetrics = useMemo(() => {
-    if (!analiseData) return null;
-    return computeMetrics(analiseData, budgetIncrease);
-  }, [analiseData, budgetIncrease]);
+    if (!enrichedAnaliseData) return null;
+    return computeMetrics(enrichedAnaliseData, budgetIncrease);
+  }, [enrichedAnaliseData, budgetIncrease]);
 
   // Metrics from General data (feeds MetricCards, Charts)
   const generalMetrics = useMemo(() => {

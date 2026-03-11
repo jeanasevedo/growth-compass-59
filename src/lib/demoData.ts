@@ -30,7 +30,7 @@ export interface GeneralData {
 export interface CampaignData {
   idCampanha: string;
   campanha: string;
-  prints: number;
+  statusCampanha: string;
   ultimaModificacao: string;
   receita: number;
   investimento: number;
@@ -44,13 +44,14 @@ export interface CampaignData {
   acosTarget: number;
   acosCompetencia: number;
   desvioAcos: string;
+  prints: number;
   cliques: number;
   lisb: number;
   lisr: number;
   percentWon: number;
   roas: number;
   roasObjetivo: number;
-  // Computed (not in file)
+  // Enriched from general data (or 0 if not available)
   conversoes: number;
 }
 
@@ -93,7 +94,7 @@ const GENERAL_HEADERS: Record<string, keyof GeneralData> = {
 const ANALISE_HEADERS: Record<string, keyof CampaignData> = {
   "ID Campaña": "idCampanha",
   "Nombre campaña": "campanha",
-  "Prints": "prints",
+  "Status actual campaña": "statusCampanha",
   "Última modificación campaña": "ultimaModificacao",
   "Ingresos por PAds": "receita",
   "Inversión PAds": "investimento",
@@ -107,6 +108,7 @@ const ANALISE_HEADERS: Record<string, keyof CampaignData> = {
   "Acos Target": "acosTarget",
   "ACOS Competencia": "acosCompetencia",
   "Desvío ACOS Target-Competencia": "desvioAcos",
+  "Prints": "prints",
   "Clicks": "cliques",
   "LISB": "lisb",
   "LISR": "lisr",
@@ -116,7 +118,7 @@ const ANALISE_HEADERS: Record<string, keyof CampaignData> = {
 };
 
 // ============================
-// Export header arrays (exact column order for re-upload)
+// Export header arrays (exact column order matching template)
 // ============================
 
 export const GENERAL_EXPORT_HEADERS = [
@@ -142,10 +144,11 @@ export const GENERAL_EXPORT_HEADERS = [
   "Receita por vendas indiretas",
 ];
 
+// Exact order from the uploaded template
 export const ANALISE_EXPORT_HEADERS = [
   "ID Campaña",
   "Nombre campaña",
-  "Prints",
+  "Status actual campaña",
   "Última modificación campaña",
   "Ingresos por PAds",
   "Inversión PAds",
@@ -159,6 +162,7 @@ export const ANALISE_EXPORT_HEADERS = [
   "Acos Target",
   "ACOS Competencia",
   "Desvío ACOS Target-Competencia",
+  "Prints",
   "Clicks",
   "LISB",
   "LISR",
@@ -171,33 +175,78 @@ export const ANALISE_EXPORT_HEADERS = [
 // Parsing helpers
 // ============================
 
+function normalizeColumnName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_\s]+/g, " ")
+    .trim();
+}
+
 function parseNumber(val: any): number {
   if (val == null) return 0;
   if (typeof val === "number") return val;
-  const str = String(val).replace(/[$%,]/g, "").replace(",", ".").trim();
-  return Number(str) || 0;
+  let str = String(val).trim();
+  // Remove currency symbols (R$, $, €, etc.) and spaces
+  str = str.replace(/[R$€£¥¤\s]/g, "");
+  // Remove percentage
+  str = str.replace(/%/g, "");
+
+  if (!str) return 0;
+
+  const lastComma = str.lastIndexOf(",");
+  const lastDot = str.lastIndexOf(".");
+
+  // Detect format: if comma comes after dot, comma is decimal (BR: 1.234,56)
+  // If dot comes after comma, dot is decimal (US: 1,234.56)
+  if (lastComma > lastDot) {
+    // Brazilian format: 80.487,65
+    str = str.replace(/\./g, ""); // remove thousands
+    str = str.replace(",", "."); // comma → dot decimal
+  } else {
+    // US format: 80,487.65 or no separator
+    str = str.replace(/,/g, ""); // remove thousands
+  }
+
+  const parsed = parseFloat(str);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function findHeader(rowKeys: string[], headerMap: Record<string, string>): Map<string, string> {
   const mapping = new Map<string, string>();
+  const normalizedMap = new Map<string, [string, string]>(); // normalized → [originalKey, field]
+  
+  for (const [hk, field] of Object.entries(headerMap)) {
+    normalizedMap.set(normalizeColumnName(hk), [hk, field]);
+  }
+
   for (const rk of rowKeys) {
     // Exact match first
     if (headerMap[rk]) {
       mapping.set(rk, headerMap[rk]);
       continue;
     }
-    // Normalized match (trim, collapse whitespace)
-    const norm = rk.replace(/\s+/g, " ").trim();
-    if (headerMap[norm]) {
-      mapping.set(rk, headerMap[norm]);
+    // Normalized match
+    const normRk = normalizeColumnName(rk);
+    if (normalizedMap.has(normRk)) {
+      mapping.set(rk, normalizedMap.get(normRk)![1]);
       continue;
     }
-    // Partial match
-    for (const [hk, field] of Object.entries(headerMap)) {
-      const hNorm = hk.replace(/\s+/g, " ").trim().toLowerCase();
-      if (norm.toLowerCase().includes(hNorm) || hNorm.includes(norm.toLowerCase())) {
+    // Starts-with match
+    for (const [normKey, [, field]] of normalizedMap) {
+      if (normRk.startsWith(normKey) || normKey.startsWith(normRk)) {
         mapping.set(rk, field);
         break;
+      }
+    }
+    // Contains match (fallback)
+    if (!mapping.has(rk)) {
+      for (const [normKey, [, field]] of normalizedMap) {
+        if (normRk.includes(normKey) || normKey.includes(normRk)) {
+          mapping.set(rk, field);
+          break;
+        }
       }
     }
   }
@@ -236,26 +285,63 @@ export function parseAnaliseXLSX(rows: any[]): CampaignData[] {
 
   return rows.map((row) => {
     const obj: any = {
-      idCampanha: "", campanha: "", prints: 0, ultimaModificacao: "",
+      idCampanha: "", campanha: "", statusCampanha: "", ultimaModificacao: "",
       receita: 0, investimento: 0, acosReal: 0, orcamentoAtual: 0,
       budgetPromedioDiario: 0, orcamentoSugerido: 0, diasTopada: 0,
       diasComPrints: 0, pctDiasTopados: 0, acosTarget: 0, acosCompetencia: 0,
-      desvioAcos: "", cliques: 0, lisb: 0, lisr: 0, percentWon: 0,
+      desvioAcos: "", prints: 0, cliques: 0, lisb: 0, lisr: 0, percentWon: 0,
       roas: 0, roasObjetivo: 0, conversoes: 0,
     };
     for (const [colName, field] of mapping) {
       const val = row[colName];
-      if (["idCampanha", "campanha", "ultimaModificacao", "desvioAcos"].includes(field)) {
+      if (["idCampanha", "campanha", "statusCampanha", "ultimaModificacao", "desvioAcos"].includes(field)) {
         obj[field] = String(val ?? "");
       } else {
-        obj[field] = parseNumber(val);
+        let num = parseNumber(val);
+        // LISB, LISR, pctDiasTopados, acosReal, etc. come as percentages
+        // If the value is already a decimal < 1 and the field expects a percentage, convert
+        if (["lisb", "lisr", "percentWon", "pctDiasTopados", "acosReal", "acosTarget", "acosCompetencia"].includes(field)) {
+          // XLSX may store 4.99% as 0.0499 or as 4.99
+          if (typeof row[colName] === "number" && row[colName] > 0 && row[colName] < 1) {
+            num = row[colName] * 100;
+          }
+        }
+        obj[field] = num;
       }
     }
     // Compute ROAS if missing
     if (!obj.roas && obj.investimento > 0) {
       obj.roas = obj.receita / obj.investimento;
     }
+    // Compute ACOS if missing
+    if (!obj.acosReal && obj.receita > 0 && obj.investimento > 0) {
+      obj.acosReal = (obj.investimento / obj.receita) * 100;
+    }
     return obj as CampaignData;
+  });
+}
+
+// ============================
+// Enrich análise data with conversions from general data
+// ============================
+export function enrichWithConversions(
+  analiseData: CampaignData[],
+  generalData: GeneralData[] | null
+): CampaignData[] {
+  if (!generalData || generalData.length === 0) return analiseData;
+
+  // Aggregate general data vendas by campaign name (normalized)
+  const vendasByCampaign = new Map<string, number>();
+  for (const row of generalData) {
+    const key = normalizeColumnName(row.campanha);
+    const existing = vendasByCampaign.get(key) || 0;
+    vendasByCampaign.set(key, existing + row.vendasPublicidade);
+  }
+
+  return analiseData.map((c) => {
+    const key = normalizeColumnName(c.campanha);
+    const vendas = vendasByCampaign.get(key) || 0;
+    return { ...c, conversoes: vendas };
   });
 }
 
@@ -284,7 +370,9 @@ export function computeMetrics(data: CampaignData[], budgetIncrease: number) {
     const ctr = c.prints > 0 ? c.cliques / c.prints : 0;
     const cliquesPerdidos = impressoesPerdidas * ctr;
     const cliquesRecuperaveis = cliquesPerdidos;
-    const vendasRecuperaveis = Math.round(cliquesRecuperaveis * vendasPorClique);
+    const vendasRecuperaveis = vendasPorClique > 0
+      ? Math.round(cliquesRecuperaveis * vendasPorClique)
+      : 0;
     const ticketMedio = c.conversoes > 0 ? c.receita / c.conversoes : 0;
     const receitaRecuperavel = vendasRecuperaveis * ticketMedio;
     const orcamentoAdicional = Math.max(0, c.orcamentoSugerido - c.orcamentoAtual);

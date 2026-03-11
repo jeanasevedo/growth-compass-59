@@ -19,6 +19,7 @@ interface CampaignOpp {
   ctr: number;
   cliquesPerdidos: number;
   cliquesRecuperaveis: number;
+  cliquesPorVenda: number;
   vendasRecuperaveis: number;
   receitaRecuperavel: number;
   orcamentoAdicional: number;
@@ -53,8 +54,10 @@ export function BudgetOpportunity({
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const campaignsWithOpp = campaigns
-    .filter((c) => c.impressoesPerdidas > 0 && c.orcamentoAdicional > 0)
-    .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel);
+    .filter((c) => c.impressoesPerdidas > 0)
+    .sort((a, b) => b.receitaRecuperavel - a.receitaRecuperavel || b.cliquesPerdidos - a.cliquesPerdidos);
+  
+  const hasConversions = campaigns.some((c) => c.conversoes > 0);
 
   if (campaignsWithOpp.length === 0) {
     return null;
@@ -134,9 +137,14 @@ export function BudgetOpportunity({
           Existem <span className="font-semibold">{totalImpressoesPerdidas.toLocaleString("pt-BR")}</span> impressões
           e <span className="font-semibold text-orange-600">{Math.round(totalCliquesPerdidos).toLocaleString("pt-BR")}</span> cliques
           perdidos por orçamento em {campaignsWithOpp.length} campanhas. Com ROAS médio de{" "}
-          <span className="font-semibold">{roasMedio.toFixed(1)}x</span>, vale recuperar até{" "}
-          <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
-          e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.
+          <span className="font-semibold">{roasMedio.toFixed(1)}x</span>
+          {hasConversions ? (
+            <>, vale recuperar até{" "}
+            <span className="font-bold text-emerald-600">+{totalVendasRecuperaveis.toLocaleString("pt-BR")}</span> vendas
+            e <span className="font-bold text-emerald-600">{fmt(totalReceitaRecuperavel)}</span> em receita adicional.</>
+          ) : (
+            <>. <span className="text-muted-foreground italic">Importe também o arquivo de Dados Gerais para calcular vendas e receita recuperáveis.</span></>
+          )}
         </p>
       </motion.div>
 
@@ -149,6 +157,7 @@ export function BudgetOpportunity({
               <th className="text-right font-medium text-muted-foreground px-3 py-3">LISB %</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Impr. Perdidas</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Cliques Perdidos</th>
+              <th className="text-right font-medium text-muted-foreground px-3 py-3">Cliques/Venda</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">ROAS</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">ACOS</th>
               <th className="text-right font-medium text-muted-foreground px-3 py-3">Budget Atual</th>
@@ -178,12 +187,19 @@ export function BudgetOpportunity({
                   <td className="px-3 py-3 text-right tabular-nums text-orange-600">
                     {Math.round(c.cliquesPerdidos).toLocaleString("pt-BR")}
                   </td>
+                  <td className="px-3 py-3 text-right tabular-nums">
+                    {c.cliquesPorVenda > 0 ? c.cliquesPorVenda.toFixed(0) : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-3 py-3 text-right tabular-nums">{c.roas.toFixed(1)}x</td>
                   <td className="px-3 py-3 text-right tabular-nums">{c.acosReal.toFixed(1)}%</td>
                   <td className="px-3 py-3 text-right tabular-nums">{fmt(c.orcamentoAtual)}</td>
                   <td className="px-3 py-3 text-right tabular-nums font-medium">{fmt(c.orcamentoSugerido)}</td>
-                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">+{c.vendasRecuperaveis}</td>
-                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">{fmt(c.receitaRecuperavel)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">
+                    {c.vendasRecuperaveis > 0 ? `+${c.vendasRecuperaveis}` : <span className="text-muted-foreground">—</span>}
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-emerald-600 font-medium">
+                    {c.receitaRecuperavel > 0 ? fmt(c.receitaRecuperavel) : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-3 py-3 text-center">
                     <Badge variant="secondary" className={`border-0 ${priorityClass}`}>
                       {priority}
