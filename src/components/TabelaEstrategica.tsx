@@ -29,7 +29,7 @@ interface Props {
   budgetIncrease: number;
 }
 
-type QuickFilter = "none" | "top10budget" | "topCliques";
+type QuickFilter = "none" | "top10budget" | "topCliques" | "maiorLisb" | "maiorVendas" | "melhorRoas";
 
 function getEscalabilidade(roas: number, roasMedio: number) {
   if (roas >= roasMedio * 1.3) return { label: "Alta", variant: "success" as const };
