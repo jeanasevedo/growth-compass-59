@@ -134,10 +134,6 @@ export function TabelaEstrategica({ campaigns, roasMedio, budgetIncrease }: Prop
             className="text-xs h-7 gap-1"
           >
             Campanhas com Melhor ROAS
-          </Button>
-            <MousePointerClick className="h-3 w-3" />
-            Maior Oportunidade de Cliques
-          </Button>
         </div>
       </div>
 
