@@ -167,11 +167,17 @@ export default function Index() {
     XLSX.writeFile(wb, `Modelo_analise_campanhas_${clientName.replace(/\s/g, "_")}.xlsx`);
   }, [analiseData, clientName]);
 
+  // Enrich análise data with conversions from general data
+  const enrichedAnaliseData = useMemo(() => {
+    if (!analiseData) return null;
+    return enrichWithConversions(analiseData, generalData);
+  }, [analiseData, generalData]);
+
   // Metrics from Análise data (feeds BudgetOpportunity + TabelaEstrategica)
   const analiseMetrics = useMemo(() => {
-    if (!analiseData) return null;
-    return computeMetrics(analiseData, budgetIncrease);
-  }, [analiseData, budgetIncrease]);
+    if (!enrichedAnaliseData) return null;
+    return computeMetrics(enrichedAnaliseData, budgetIncrease);
+  }, [enrichedAnaliseData, budgetIncrease]);
 
   // Metrics from General data (feeds MetricCards, Charts)
   const generalMetrics = useMemo(() => {
