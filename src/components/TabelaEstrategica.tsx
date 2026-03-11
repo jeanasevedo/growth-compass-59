@@ -21,6 +21,7 @@ interface CampaignRow {
   orcamentoSugerido: number;
   pctDiasTopados: number;
   budgetPacing: number;
+  vendasRecuperaveis: number;
 }
 
 interface Props {
